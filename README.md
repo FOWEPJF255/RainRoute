@@ -6,7 +6,7 @@ RainRoute is an explainable, constraint-first cultural itinerary prototype. It r
 
 ## Try the demo
 
-The [browser demo](https://fowepjf255.github.io/RainRoute/) includes rainy-day replanning, a 90-minute delay plus closure, no solution, and a simulated candidate-retrieval failure. The interface is currently in Chinese. The labels translate as follows: 原路线 = original route; 当前分支 = selected alternative; 为什么这样替换 = explanation; 硬约束单独核对 = hard-constraint checks; 合成演示数据 = synthetic demo data; 无解 = no feasible route. The source files in `docs/` are a self-contained GitHub Pages build.
+The [browser demo](https://fowepjf255.github.io/RainRoute/) includes rainy-day replanning, a 90-minute delay plus closure, no solution, and a simulated candidate-retrieval failure. The interface is currently in Chinese; the [English walkthrough](DEMO_GUIDE_EN.md) translates its controls, states, and testing steps. The source files in `docs/` are a self-contained GitHub Pages build.
 
 ## Run locally
 
