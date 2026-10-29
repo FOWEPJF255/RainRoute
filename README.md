@@ -26,7 +26,7 @@ Open `http://127.0.0.1:3000/`. The server binds to localhost. API routes:
 - `GET /api/entity-search?q=...` and `GET /api/insights?entityId=...` use Qloo when a private `QLOO_API_KEY` environment variable is configured.
 - `POST /api/plan` with `mode=live` can discover Qloo place candidates, then returns `VENUE_FACTS_UNVERIFIED` until hours, prices, walking time, and weather have trustworthy independent sources. It never silently substitutes demo facts.
 
-The Qloo key stays on the server. Do not commit it, put it in a URL, or expose it to the browser. Hackathon keys are intended for `https://hackathon.api.qloo.com`.
+The Qloo key stays on the server. When an official key is issued, put `QLOO_API_KEY=...` in a local `.env` copied from `.env.example`, or provide it as a process environment variable. `.env` is Git-ignored. Run `npm run verify:qloo` to perform a private live search followed by a place-insights request; it prints only the result counts and status, never the key or raw Qloo response. This verifies API access, **not** real-world itinerary feasibility. Do not commit the key, put it in a URL, or expose it to the browser. Hackathon keys are intended for `https://hackathon.api.qloo.com`.
 
 ## Architecture and evidence
 

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.cjs",
     "build:static": "node scripts/build-static.cjs",
+    "verify:qloo": "node scripts/qloo-preflight.cjs",
     "test": "node --test"
   },
   "engines": {

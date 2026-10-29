@@ -6,6 +6,7 @@ const path = require('node:path');
 const { catalogue } = require('./src/catalogue.cjs');
 const { createQlooClient } = require('./src/qloo-client.cjs');
 const { runAgent } = require('./src/agent.cjs');
+const { loadQlooApiKey } = require('./src/local-key.cjs');
 
 function send(response, status, payload) {
   response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8',
@@ -88,7 +89,7 @@ function createServer({ apiKey = '', fetchImpl = globalThis.fetch } = {}) {
 if (require.main === module) {
   const host = '127.0.0.1';
   const port = Number(process.env.PORT || 3000);
-  createServer({ apiKey: process.env.QLOO_API_KEY || '' }).listen(port, host, () => {
+  createServer({ apiKey: loadQlooApiKey() }).listen(port, host, () => {
     process.stdout.write(`RainRoute API: http://${host}:${port}\n`);
   });
 }
