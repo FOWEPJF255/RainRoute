@@ -10,7 +10,7 @@ The [browser demo](https://fowepjf255.github.io/RainRoute/) includes rainy-day r
 
 ## Run locally
 
-Requires Node.js 20 or newer.
+The RainRoute server requires Node.js 20 or newer. The official Qloo hackathon harness below requires Node.js **22.19.0 or newer**.
 
 ```bash
 npm ci
@@ -26,7 +26,27 @@ Open `http://127.0.0.1:3000/`. The server binds to localhost. API routes:
 - `GET /api/entity-search?q=...` and `GET /api/insights?entityId=...` use Qloo when a private `QLOO_API_KEY` environment variable is configured.
 - `POST /api/plan` with `mode=live` can discover Qloo place candidates, then returns `VENUE_FACTS_UNVERIFIED` until hours, prices, walking time, and weather have trustworthy independent sources. It never silently substitutes demo facts.
 
-The Qloo key stays on the server. When an official key is issued, put `QLOO_API_KEY=...` in a local `.env` copied from `.env.example`, or provide it as a process environment variable. `.env` is Git-ignored. Run `npm run verify:qloo` to perform a private live search followed by a place-insights request; it prints only the result counts and status, never the key or raw Qloo response. This verifies API access, **not** real-world itinerary feasibility. Do not commit the key, put it in a URL, or expose it to the browser. Hackathon keys are intended for `https://hackathon.api.qloo.com`.
+The Qloo key stays on the server. When an official key is issued, put `QLOO_API_KEY=...` in a local `.env` copied from `.env.example`, or provide it as a process environment variable. `.env` is Git-ignored. Run `npm run verify:qloo` to perform a private live search followed by a place-insights request; it prints only status, timestamp, endpoint host, and result counts, never the key or raw Qloo response. This verifies API access, **not** real-world itinerary feasibility. Do not commit the key, put it in a URL, or expose it to the browser. The direct HTTP adapter pins its destination to `https://hackathon.api.qloo.com`.
+
+## Official Qloo harness: private local check
+
+The [organizer's hackathon kit](https://github.com/qloo/qloo-hackathon-kit) documents `qloo exec` and `qloo mcp` for project workflows, plus `qloo api` for individual endpoints and read-only `qloo explore`. Its `integrate`, `plan`, and `build` modes are outside this event. RainRoute currently uses its own direct HTTP adapter; the commands below validate the official harness separately and do **not** prove that RainRoute's live route works. No live Qloo response has been validated for this project yet.
+
+After receiving an event-issued key, run these commands **locally** in PowerShell. The two base-URL variables configure the harness; the RainRoute HTTP adapter uses its pinned destination. The request file contains only the public cultural concept `jazz`.
+
+```powershell
+$env:QLOO_BASE_URL = 'https://hackathon.api.qloo.com'
+$env:QLOO_TRUSTED_BASE_URL = 'https://hackathon.api.qloo.com'
+npm install --global @qloo/qloo-harness
+qloo --version # require 0.1.26 or newer
+qloo setup --qloo # enter the issued key in this local interactive prompt
+qloo setup --status
+qloo exec find_tags --input-file examples/qloo-find-tags.request.json
+```
+
+The last command returns Qloo data to the local terminal. Review it privately; do not paste the output into a public issue, demo, log, or repository. For RainRoute's separate server adapter, supply the same **individually issued** key only through a local process environment variable or the ignored `.env`, then run `npm run verify:qloo`. That preflight must succeed before claiming a tested API connection. A competition-ready live route also needs independent evidence for hours, prices, travel times, and weather, followed by an end-to-end test.
+
+Never send user names, email addresses, device or account IDs, or location histories in demo queries. Use aggregate cultural concepts or public cultural entities, keep the key out of web/mobile bundles and recordings, and treat [Qloo affinity results](https://github.com/qloo/qloo-hackathon-kit/blob/main/docs/SAFE_USE.md) as cultural signals rather than facts about an individual or a venue's current operations. The [event access rules](https://github.com/qloo/qloo-hackathon-kit/blob/main/docs/API_ACCESS.md) require an individually attributable credential and bounded use.
 
 ## Architecture and evidence
 
