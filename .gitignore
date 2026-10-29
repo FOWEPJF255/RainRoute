@@ -1,0 +1,9 @@
+node_modules/
+_qa/
+.env
+*.log
+*.docx
+README.txt
+build_docs.py
+render_qa.py
+render_word.ps1

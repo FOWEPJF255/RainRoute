@@ -1,0 +1,70 @@
+/* RainRoute 视觉设计 Token v1.0
+   交付口径：颜色/字号/间距以此文件为唯一依据
+   数据来源：src/planner.cjs + src/catalogue.cjs 合成目录实跑结果
+   页面：桌面 1440 / 手机 390 / 手机窄屏 320 */
+:root {
+  /* 画布与表面 */
+  --rr-bg-canvas: #F1F3EE;
+  --rr-bg-card: #FFFFFF;
+  --rr-bg-subtle: #F7F8F4;
+  --rr-bg-demo: #FFF4D9;
+  --rr-bg-select: #DAE1C9;
+
+  /* 墨色 */
+  --rr-ink-primary: #203D35;
+  --rr-ink-secondary: #61736B;
+  --rr-ink-muted: #8A9A93;
+  --rr-ink-inverse: #FFFFFF;
+  --rr-ink-demo: #6D542B;
+
+  /* 描边 */
+  --rr-line-soft: #D1DACF;
+  --rr-line-strong: #AFBFB4;
+
+  /* 路线与状态 */
+  --rr-route-current: #365C48;   /* 当前分支：4px 实线 + 实心节点 */
+  --rr-route-original: #A3B0A3;  /* 原路线：2.5px 低对比虚线 + 空心节点 */
+  --rr-status-pass: #365C48;
+  --rr-status-warn: #855B2B;
+  --rr-status-error: #9B403C;
+
+  /* 来源标记（三类必须显著区分） */
+  --rr-source-qloo: #6A4F7D;       /* Qloo 文化关联 · 紫 · 圆点加号 */
+  --rr-source-verified: #2C797A;   /* 独立核验来源 · 青 · 对勾 */
+  --rr-source-demo-ink: #6D542B;   /* 演示数据 · 琥珀 · 盾牌 */
+
+  /* 字体 */
+  --rr-font-cjk: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --rr-font-numeric: "Inter", system-ui, sans-serif;
+
+  /* 字号 */
+  --rr-size-display: 28px;
+  --rr-size-h1: 22px;
+  --rr-size-section: 18px;
+  --rr-size-card-title: 15px;
+  --rr-size-body: 13px;
+  --rr-size-caption: 11px;
+
+  /* 间距（4px 基准栅格） */
+  --rr-space-xs: 4px;
+  --rr-space-sm: 8px;
+  --rr-space-md: 16px;
+  --rr-space-lg: 24px;
+  --rr-space-xl: 32px;
+
+  /* 圆角 */
+  --rr-radius-card: 12px;
+  --rr-radius-control: 8px;
+  --rr-radius-tag: 6px;
+
+  /* 焦点样式（全站统一） */
+  --rr-focus-outline: 3px solid #A8BE77;
+  --rr-focus-offset: 2px;
+
+  /* 触控与断点 */
+  --rr-touch-min: 44px;
+  --rr-breakpoint-desktop: 1440px;
+  --rr-breakpoint-tablet: 1180px;
+  --rr-breakpoint-mobile: 720px;
+  --rr-breakpoint-narrow: 320px;
+}

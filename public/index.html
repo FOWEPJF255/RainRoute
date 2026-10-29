@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F1F3EE">
+  <meta name="description" content="RainRoute 文化路线分支沙盘：用合成数据演示天气、迟到、关闭与预算变化时的可解释重规划。">
+  <title>RainRoute · 文化路线分支沙盘</title>
+  <link rel="stylesheet" href="/tokens.css">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="RainRoute 首页">
+      <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M7 19.5v-3.2a7 7 0 0 1 7-7h2.4"/><path d="M9 10.5l-2.5-2.5M16.4 9.3l2.8-2.8"/><circle cx="19" cy="8" r="2"/><circle cx="7" cy="20" r="2"/></svg></span>
+      <strong>RainRoute</strong><span class="brand-sub">文化路线分支沙盘</span>
+    </a>
+    <div class="top-meta"><span class="demo-pill">◇ 演示数据，未接通 Qloo</span><span class="review-date">设计确认稿 · 2026.10.29</span></div>
+  </header>
+  <div class="demo-banner" role="note">ⓘ　全部地点、文化关联、天气、费用与路程均为合成演示数据；街区布局为自制示意，不代表真实地理位置。</div>
+  <main class="page">
+    <section class="hero" aria-live="polite">
+      <div><p class="eyebrow">第一眼 · 发生了什么变化，能否继续走</p><h1 id="hero-title">下雨了，还能怎样走？</h1><p id="hero-description"></p></div>
+      <div id="hero-result" class="hero-result"></div>
+    </section>
+    <nav class="presets" aria-label="快速情境">
+      <span>快速情境</span>
+      <button type="button" data-preset="clear">晴天原计划</button>
+      <button type="button" data-preset="rain">突然下雨</button>
+      <button type="button" data-preset="late">迟到 90 分钟</button>
+      <button type="button" data-preset="closed">胶片小馆关闭</button>
+      <button type="button" data-preset="budget">预算降到 ¥15</button>
+      <button type="button" data-preset="mixed">下雨且迟到</button>
+      <button type="button" data-preset="fault">候选检索故障</button>
+    </nav>
+    <div id="dirty-notice" class="dirty-notice" role="status" hidden>条件已修改；下方仍是上次计算结果，请重新规划。</div>
+    <div class="dashboard">
+      <aside class="card controls" aria-labelledby="controls-title">
+        <h2 id="controls-title">这次发生了什么</h2>
+        <div class="field theme-field"><label for="theme">文化主题</label><select id="theme"></select></div>
+        <div class="control-grid">
+          <div class="field"><label for="delay">迟到时间</label><select id="delay"><option value="0">未迟到</option><option value="30">30 分钟</option><option value="60">60 分钟</option><option value="90">90 分钟</option><option value="120">120 分钟</option></select></div>
+          <div class="field"><label for="end">最晚结束</label><select id="end"><option value="960">16:00</option><option value="1020" selected>17:00</option><option value="1080">18:00</option><option value="1140">19:00</option></select></div>
+          <div class="field"><label for="budget">三站总预算 ¥</label><input id="budget" type="number" min="0" max="10000" step="1" value="100" inputmode="numeric"></div>
+          <div class="field"><label for="closed">临时关闭的节点</label><select id="closed"><option value="">无</option></select></div>
+        </div>
+        <label class="rain-toggle" for="rain"><input id="rain" type="checkbox" checked><span class="check-mark" aria-hidden="true">✓</span><span>下雨，排除露天节点</span></label>
+        <div class="field fault-field"><label for="fault">候选检索状态（故障演示）</label><select id="fault"><option value="none">正常</option><option value="timeout">模拟超时</option><option value="auth">模拟 401</option><option value="empty">模拟空结果</option></select></div>
+        <p id="input-error" class="input-error" role="alert"></p>
+        <button id="replan" class="button primary full" type="button">应用变化并重规划</button>
+        <p class="helper">13:00 原定出发；仅步行，合成费用只含三站体验。每站完成后再去下一站，等待开门也计入总时间。</p>
+      </aside>
+      <div class="center-column">
+        <section class="card map-card" aria-labelledby="map-title">
+          <div class="card-heading"><div><h2 id="map-title">原路线与替代分支</h2><p id="theme-note" class="subtle"></p></div><button id="view-toggle" class="button ghost" type="button" aria-pressed="false">▱ 切换立体示意</button></div>
+          <div id="map-wrap" class="map-wrap"><svg id="route-map" viewBox="0 0 660 400" role="img" aria-label="合成街区原路线与替代分支示意"></svg></div>
+          <div class="map-legend"><span><i class="legend-line original"></i>原路线（仅对照）</span><span><i class="legend-line current"></i>当前替代分支</span><span><i class="legend-blocked">⊘</i>失效节点</span><small>街区布局为自制示意，不代表真实地理位置</small></div>
+        </section>
+        <section id="branch-section" class="card branch-section" aria-labelledby="branch-title"><div class="card-heading"><h2 id="branch-title">选择一个替代分支</h2><span id="branch-count" class="subtle"></span></div><div id="branches"></div></section>
+      </div>
+      <aside class="evidence-column">
+        <section class="card evidence" aria-labelledby="evidence-title"><h2 id="evidence-title">为什么这样替换</h2><div id="explanation"></div><div class="source-note"><strong>⊕　文化关联与 Qloo</strong><p>这里仅使用合成文化关联，不证明个人一定喜欢。正式产品必须先由真实 Qloo 检索产生文化候选，再独立核查时间与营业等约束。</p></div><button id="adopt-side" class="button primary full adopt" type="button">采纳当前分支</button><p id="adopt-note-side" class="helper adopt-note">尚未采纳路线。采纳仅保存本页会话，未订票或支付。</p></section>
+        <section class="card agent-trace" aria-labelledby="trace-title"><h2 id="trace-title">Agent 本轮过程</h2><ol id="trace"></ol></section>
+      </aside>
+    </div>
+    <section class="comparison" aria-label="路线详情"><article class="card" aria-labelledby="original-title"><div class="card-heading"><h2 id="original-title">原计划</h2><small>固定 A0 → B0 → C0</small></div><div id="original-route"></div></article><article class="card selected-route" aria-labelledby="selected-title"><div class="card-heading"><h2 id="selected-title">当前分支</h2><small id="selected-ids"></small></div><div id="selected-route"></div></article></section>
+    <section class="card checks-card" aria-labelledby="checks-title"><h2 id="checks-title">硬约束单独核对</h2><p class="subtle">主题相关不等于路线可行；每项独立给出依据</p><div id="checks"></div></section>
+    <div class="mobile-adopt"><button id="adopt-mobile" class="button primary full adopt" type="button">采纳当前分支</button><p id="adopt-note-mobile" class="helper adopt-note">尚未采纳路线。采纳仅保存本页会话，未订票或支付。</p></div>
+    <footer><span>RainRoute · 合成演示与交互确认稿</span><span>不提供导航、自动订票、支付或无限城市覆盖。</span></footer>
+  </main>
+  <dialog id="venue-dialog" class="venue-dialog" aria-labelledby="venue-dialog-title"><button id="dialog-close" class="dialog-close" type="button" aria-label="关闭">×</button><h2 id="venue-dialog-title"></h2><div id="venue-dialog-body"></div></dialog>
+</body>
+</html>
