@@ -7,6 +7,7 @@
     "start": "node server.cjs",
     "build:static": "node scripts/build-static.cjs",
     "verify:qloo": "node scripts/qloo-preflight.cjs",
+    "verify:live-server": "node scripts/verify-live-server.cjs",
     "test": "node --test"
   },
   "engines": {

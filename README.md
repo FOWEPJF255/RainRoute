@@ -2,7 +2,7 @@
 
 RainRoute is an explainable, constraint-first cultural itinerary prototype. It replans a three-stop route when rain, a late arrival, a closure, a smaller budget, or an earlier finish invalidates the original. It checks hard constraints before ranking the remaining routes and shows a clear no-solution state when none survive.
 
-**Status:** This is a synthetic-data prototype, not a live travel service. Every demo venue, affinity score, coordinate, opening hour, price, walking estimate, and weather condition is invented. The static web demo runs the same deterministic planner as the local server. It does **not** call Qloo. The server has a separate Qloo adapter for entity search and place insights, but its live path deliberately stops before presenting an itinerary when operational venue facts have not been verified. The adapter has not yet been validated with an issued hackathon API key.
+**Status:** This is a synthetic-data prototype, not a live travel service. Every demo venue, affinity score, coordinate, opening hour, price, walking estimate, and weather condition is invented. The static web demo runs the same deterministic planner as the local server. It does **not** call Qloo. On October 30, 2026, the local server's Qloo adapter successfully made authenticated entity-search and place-insights requests against the hackathon endpoint. Its live path deliberately stops before presenting an itinerary when operational venue facts have not been verified.
 
 ## Try the demo
 
@@ -30,7 +30,7 @@ The Qloo key stays on the server. When an official key is issued, put `QLOO_API_
 
 ## Official Qloo harness: private local check
 
-The [organizer's hackathon kit](https://github.com/qloo/qloo-hackathon-kit) documents `qloo exec` and `qloo mcp` for project workflows, plus `qloo api` for individual endpoints and read-only `qloo explore`. Its `integrate`, `plan`, and `build` modes are outside this event. RainRoute currently uses its own direct HTTP adapter; the commands below validate the official harness separately and do **not** prove that RainRoute's live route works. No live Qloo response has been validated for this project yet.
+The [organizer's hackathon kit](https://github.com/qloo/qloo-hackathon-kit) documents `qloo exec` and `qloo mcp` for project workflows, plus `qloo api` for individual endpoints and read-only `qloo explore`. Its `integrate`, `plan`, and `build` modes are outside this event. RainRoute currently uses its own direct HTTP adapter; the commands below validate the official harness separately and do **not** prove that RainRoute's live route works.
 
 After receiving an event-issued key, run these commands **locally** in PowerShell. The two base-URL variables configure the harness; the RainRoute HTTP adapter uses its pinned destination. The request file contains only the public cultural concept `jazz`.
 
@@ -44,7 +44,7 @@ qloo setup --status
 qloo exec find_tags --input-file examples/qloo-find-tags.request.json
 ```
 
-The last command returns Qloo data to the local terminal. Review it privately; do not paste the output into a public issue, demo, log, or repository. For RainRoute's separate server adapter, supply the same **individually issued** key only through a local process environment variable or the ignored `.env`, then run `npm run verify:qloo`. That preflight must succeed before claiming a tested API connection. A competition-ready live route also needs independent evidence for hours, prices, travel times, and weather, followed by an end-to-end test.
+The last command returns Qloo data to the local terminal. Review it privately; do not paste the output into a public issue, demo, log, or repository. For RainRoute's separate server adapter, supply the same **individually issued** key only through a local process environment variable or the ignored `.env`, then run `npm run verify:qloo` and `npm run verify:live-server`. The October 30 preflight returned 20 search candidates and 5 place insights. The local HTTP check reached Qloo through the LangGraph workflow and returned `VENUE_FACTS_UNVERIFIED` as designed. A working live route still needs independent evidence for hours, prices, travel times, and weather, followed by an end-to-end route test.
 
 Never send user names, email addresses, device or account IDs, or location histories in demo queries. Use aggregate cultural concepts or public cultural entities, keep the key out of web/mobile bundles and recordings, and treat [Qloo affinity results](https://github.com/qloo/qloo-hackathon-kit/blob/main/docs/SAFE_USE.md) as cultural signals rather than facts about an individual or a venue's current operations. The [event access rules](https://github.com/qloo/qloo-hackathon-kit/blob/main/docs/API_ACCESS.md) require an individually attributable credential and bounded use.
 

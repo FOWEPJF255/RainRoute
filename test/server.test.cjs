@@ -36,7 +36,7 @@ test('本地接口标记合成数据并阻止未核验真实路线', async () =>
   });
 });
 
-test('真实 Qloo 候选经过 Agent 状态图后，缺独立事实时停止规划', async () => {
+test('模拟 Qloo 候选经过 Agent 状态图后，缺独立事实时停止规划', async () => {
   let calls = 0;
   await withServer({ apiKey: 'test-key', fetchImpl: async () => {
     calls++;

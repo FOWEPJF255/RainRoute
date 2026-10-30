@@ -1,6 +1,6 @@
 # RainRoute: English demo walkthrough
 
-Open the [interactive demo](https://fowepjf255.github.io/RainRoute/). This page is a **synthetic-data preview**. It does not call Qloo, a weather provider, a map, or a booking service. The venues and cultural affinity scores are invented to demonstrate the route decision process. The public repository contains a separate, still-unvalidated server-side Qloo adapter. We do not claim a live Qloo-powered itinerary.
+Open the [interactive demo](https://fowepjf255.github.io/RainRoute/). This page is a **synthetic-data preview**. It does not call Qloo, a weather provider, a map, or a booking service. The venues and cultural affinity scores are invented to demonstrate the route decision process. The public repository contains a separate server-side Qloo adapter, verified against the hackathon API on October 30, 2026. We do not claim a live Qloo-powered itinerary.
 
 ## What you see
 
@@ -19,4 +19,4 @@ You can also choose `晴天原计划` (clear day), `胶片小馆关闭` (the ori
 
 ## Source and verification boundaries
 
-The public demo is built from the same `src/planner.cjs` code as the local Node.js app. The local app runs a LangGraph workflow (`resolve → discover → verify → replan → explain`) and contains a Qloo API adapter in `src/qloo-client.cjs`. Because the API key has not yet been used and real-world venue facts have not been independently checked, live route planning is blocked. Run `npm ci && npm test && npm start` from the repository to inspect the local path and tests. The static page is provided to show the interaction and constraint behavior while that integration remains unfinished.
+The public demo is built from the same `src/planner.cjs` code as the local Node.js app. The local app runs a LangGraph workflow (`resolve → discover → verify → replan → explain`) and contains a Qloo API adapter in `src/qloo-client.cjs`. Authenticated search and place-insights calls have succeeded locally, and a local live-mode check reached Qloo and stopped at `VENUE_FACTS_UNVERIFIED`. Because real-world venue facts have not been independently checked, live route planning remains blocked. Run `npm ci && npm test && npm start` from the repository to inspect the local path and tests. The static page shows the interaction and constraint behavior while live route planning remains unfinished.
