@@ -1,0 +1,21 @@
+'use strict';
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.join(__dirname,'..');
+const output = process.argv[2];
+if (!output || !path.isAbsolute(output)) throw new Error('Pass an absolute Sites project directory.');
+const assets = {};
+function add(route,file,type) { assets[route]={body:fs.readFileSync(path.join(root,file),'utf8'),type}; }
+add('/','public/live.html','text/html; charset=utf-8');
+add('/live.css','public/live.css','text/css; charset=utf-8');
+add('/live.js','public/live.js','text/javascript; charset=utf-8');
+add('/sandbox/','docs/index.html','text/html; charset=utf-8');
+assets['/sandbox/'].body=assets['/sandbox/'].body.replace('<div class="top-meta">','<div class="top-meta"><a class="english-guide" href="/">Live Qloo discovery ↗</a>');
+for(const file of ['app.js','static-engine.js','style.css','tokens.css']) add('/sandbox/'+file,'docs/'+file,file.endsWith('.css')?'text/css; charset=utf-8':'text/javascript; charset=utf-8');
+const discovery=fs.readFileSync(path.join(root,'src/discovery.mjs'),'utf8').replaceAll('export ','');
+const quota=fs.readFileSync(path.join(root,'src/quota.mjs'),'utf8').replaceAll('export ','');
+const worker=fs.readFileSync(path.join(root,'src/hosted-worker.mjs'),'utf8').replace(/^import[^\n]+\n/gm,'').replaceAll('export ','');
+const source=discovery+'\n'+quota+'\n'+worker+'\nconst assets='+JSON.stringify(assets)+';\nconst handle=createHostedHandler();\nexport default { fetch(request,env) { return handle(request,env,assets); } };\n';
+fs.mkdirSync(path.join(output,'worker'),{recursive:true});
+fs.writeFileSync(path.join(output,'worker/index.js'),source);
+console.log('Built hosted Worker with explicit public assets; no environment files included.');

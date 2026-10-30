@@ -1,5 +1,17 @@
 # RainRoute: English demo walkthrough
 
+## Live Qloo discovery
+
+Open the [live English experience](https://rainroute-cultural-agent.lunarsnail20.chatgpt.site). No login or API key entry is needed for a visitor. Choose a cultural seed and click **Discover places**. The server resolves that seed and calls Qloo place insights. Candidate names, descriptions, cultural tags, and response ranks come from Qloo; they are not the fixtures used by the separate planning sandbox.
+
+Click **Inspect evidence** to see provider metadata and the facts still missing for a real trip. Click **Shortlist** on two candidates to compare their locations, tags, and verification checklists; remove either candidate to check session state. Change the seed and repeat to explore another cultural context. The closed-place filter excludes candidates for which Qloo reports `is_closed=true`; absence of that flag is not proof that a venue is currently open.
+
+The source badge shows when the response was obtained and whether it was cached (30 minutes). Each anonymous browser has 6 discovery attempts per UTC day, with an additional shared-network cap of 30 and an upstream-service budget of 120 HTTP requests per day. The displayed reset time uses the visitor's timezone. A daily limit produces an explicit pause rather than synthetic fallback. These anonymous limits are by browser and network, not verified natural-person identity.
+
+The four-stage live trail is **Resolve → Discover → Verify → Decide**. A real itinerary stays blocked because independent venue facts are missing. The separate synthetic planning sandbox below demonstrates the route decision process under explicit fixture constraints.
+
+## Synthetic planning sandbox
+
 Open the [interactive demo](https://fowepjf255.github.io/RainRoute/). This page is a **synthetic-data preview**. It does not call Qloo, a weather provider, a map, or a booking service. The venues and cultural affinity scores are invented to demonstrate the route decision process. The public repository contains a separate server-side Qloo adapter, verified against the hackathon API on October 30, 2026. We do not claim a live Qloo-powered itinerary.
 
 ## What you see

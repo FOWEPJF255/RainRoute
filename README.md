@@ -1,16 +1,18 @@
 # RainRoute
 
-RainRoute is an explainable, constraint-first cultural itinerary prototype. It replans a three-stop route when rain, a late arrival, a closure, a smaller budget, or an earlier finish invalidates the original. It checks hard constraints before ranking the remaining routes and shows a clear no-solution state when none survive.
+RainRoute is a cultural discovery and feasibility-screening agent. Its live experience resolves a public cultural seed, requests real Qloo place insights, presents an inspectable candidate shortlist, and identifies the operational facts that still need verification. A separate planning sandbox demonstrates how hard constraints change a three-stop route during rain, delay, closure, budget, and finish-time disruptions.
 
-**Status:** This is a synthetic-data prototype, not a live travel service. Every demo venue, affinity score, coordinate, opening hour, price, walking estimate, and weather condition is invented. The static web demo runs the same deterministic planner as the local server. It does **not** call Qloo. On October 30, 2026, the local server's Qloo adapter successfully made authenticated entity-search and place-insights requests against the hackathon endpoint. Its live path deliberately stops before presenting an itinerary when operational venue facts have not been verified.
+**Status:** Live cultural discovery calls Qloo on the server. The planning sandbox uses synthetic venues and operational facts and does not call Qloo. Neither experience claims a verified real-world itinerary: Qloo affinity and provider metadata do not establish current opening status, actual cost, indoor access, walking time, or weather suitability.
 
 ## Try the demo
 
-The [browser demo](https://fowepjf255.github.io/RainRoute/) includes rainy-day replanning, a 90-minute delay plus closure, no solution, and a simulated candidate-retrieval failure. The interface is currently in Chinese; the [English walkthrough](DEMO_GUIDE_EN.md) translates its controls, states, and testing steps. The source files in `docs/` are a self-contained GitHub Pages build.
+The [live English experience](https://rainroute-cultural-agent.lunarsnail20.chatgpt.site) discovers Qloo places from three public seeds: a film, a musician, and an author. Inspect each candidate's evidence, compare locations and cultural tags, add or remove candidates from a session shortlist, and review the verification checklist and agent trail. A closed-place filter uses Qloo's closure flag, explicitly labeled as provider metadata.
+
+The [synthetic planning sandbox](https://fowepjf255.github.io/RainRoute/) includes rainy-day replanning, a 90-minute delay plus closure, no solution, and a simulated retrieval failure. Its interface is in Chinese; the [English walkthrough](DEMO_GUIDE_EN.md) translates its controls and testing steps. The source files in `docs/` are a self-contained GitHub Pages build. The hosted live experience also serves it at `/sandbox/`.
 
 ## Run locally
 
-The RainRoute server requires Node.js 20 or newer. The official Qloo hackathon harness below requires Node.js **22.19.0 or newer**.
+Requires Node.js **22.19.0 or newer** (including the official Qloo harness and the SQLite quota tests).
 
 ```bash
 npm ci
@@ -18,10 +20,11 @@ npm test
 npm start
 ```
 
-Open `http://127.0.0.1:3000/`. The server binds to localhost. API routes:
+Open `http://127.0.0.1:3000/live.html` for live discovery, or `/` for the synthetic sandbox. The server binds to localhost. API routes:
 
 - `GET /api/health` returns the readiness flags.
 - `GET /api/demo/catalog` returns the **synthetic** scenario catalogue.
+- `POST /api/discover` with `{"theme":"cinema"}` (or `jazz`, `books`) runs real cultural discovery. It accepts only fixed public seeds.
 - `POST /api/plan` with `{"mode":"demo","scenario":{"theme":0,"rain":true,"delay":0,"budget":100,"end":1020,"closed":null}}` runs the demo agent graph.
 - `GET /api/entity-search?q=...` and `GET /api/insights?entityId=...` use Qloo when a private `QLOO_API_KEY` environment variable is configured.
 - `POST /api/plan` with `mode=live` can discover Qloo place candidates, then returns `VENUE_FACTS_UNVERIFIED` until hours, prices, walking time, and weather have trustworthy independent sources. It never silently substitutes demo facts.
@@ -52,10 +55,23 @@ Never send user names, email addresses, device or account IDs, or location histo
 
 `src/agent.cjs` contains the LangGraph sequence `resolve → discover → verify → replan → explain`. `src/planner.cjs` exhaustively evaluates three-stop combinations and enforces opening windows, closure, weather, budget, and finish time. `src/qloo-client.cjs` validates requests and handles authentication, rate limits, timeouts, and network errors. `src/catalogue.cjs` is exclusively synthetic fixture data. `public/` is the responsive interface. `scripts/build-static.cjs` packages its browser preview in `docs/` without requiring an API key.
 
+`src/discovery.mjs` is the live discovery workflow. `src/hosted-worker.mjs` serves the hosted experience using the same workflow and explicit source labels; this lightweight Worker uses deterministic orchestration, while the local route path uses LangGraph. `scripts/build-hosted.cjs <absolute-sites-project-directory>` embeds only the specified public assets and source into a Worker. It never reads or bundles `.env`.
+
+## Visitor and key budgets
+
+The hosted deployment requires a D1 `DB` binding and a `quota_buckets` table (`key TEXT PRIMARY KEY, hits INTEGER NOT NULL DEFAULT 0, expires_at INTEGER NOT NULL`). Quota updates use an atomic conditional upsert. If quota protection is unavailable, discovery fails closed before contacting Qloo.
+
+- Each anonymous browser gets 6 discovery attempts per UTC day, including cached results and failed attempts. The UI displays its remaining allowance and local reset time.
+- Each network gets 30 attempts per UTC day to reduce cookie-reset abuse. Anonymous browser/network limits cannot prove a natural person's identity; shared networks share this cap.
+- The entire service reserves at most 120 upstream Qloo HTTP requests per UTC day, two per uncached discovery workflow. Failed upstream calls conservatively retain their reservation.
+- Same-seed results are cached in Worker memory for 30 minutes. A best-effort 12-request/minute network throttle and 30-workflow/minute isolate throttle supplement the durable daily limits.
+
+The browser identifier is a same-site, secure, HttpOnly cookie. Stored counter keys contain a daily salted hash, not raw IP addresses, user names, or location histories. Neither browser identifiers nor network addresses are sent to Qloo. The local-only Node development server does not expose the hosted quota service and must not be published as an unprotected public proxy.
+
 `npm test` covers the planner, server, Qloo request construction, and the guard against unverified live routes. `node scripts/qa-browser.cjs` checks the desktop and 390/320px UI states when Playwright is available; set `CODEX_PLAYWRIGHT_PATH` to a local Playwright installation if needed. Its screenshots are local artifacts and are excluded from Git.
 
 ## Limits
 
-The static preview does not execute LangGraph or Qloo in the browser; it is a planner and interface demonstration. Live route planning requires an issued Qloo key and independent sources for real-world venue facts. No booking, payment, navigation, or real-time weather feature is implemented.
+The hosted app provides live cultural discovery and candidate review. The static sandbox does not execute LangGraph or Qloo in the browser. Real itinerary generation remains blocked until independent operational facts are verified. Candidate ranking is cultural affinity, not geographic proximity or a probability about an individual. No booking, payment, navigation, or real-time weather feature is implemented.
 
 Licensed under MIT. See [LICENSE](LICENSE).

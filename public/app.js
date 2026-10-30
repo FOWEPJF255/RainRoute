@@ -210,7 +210,7 @@ function renderEvidence() {
   }
   const messages = {
     'resolve:synthetic-theme': '读取明确事件与合成文化种子。',
-    'discover:synthetic-catalogue': '读取 9 个自造地点；未来替换为真实 Qloo 候选。',
+    'discover:synthetic-catalogue': '本沙盘读取 9 个自造地点；真实 Qloo 候选由独立发现页提供。',
     'verify:synthetic-demo-only': '核对数据来源：全部为合成演示，不作为真实推荐。',
     'replan:hard-constraints': `枚举 ${result.examined} 条组合，独立检查 5 类硬约束。`,
     'explain:source-bound': '只依据路线与约束结果生成替换说明。'

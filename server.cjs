@@ -41,7 +41,11 @@ function createServer({ apiKey = '', fetchImpl = globalThis.fetch } = {}) {
         '/index.html': ['index.html', 'text/html; charset=utf-8'],
         '/style.css': ['style.css', 'text/css; charset=utf-8'],
         '/tokens.css': ['tokens.css', 'text/css; charset=utf-8'],
-        '/app.js': ['app.js', 'text/javascript; charset=utf-8']
+        '/app.js': ['app.js', 'text/javascript; charset=utf-8'],
+        '/sandbox/': ['index.html', 'text/html; charset=utf-8'],
+        '/live.html': ['live.html', 'text/html; charset=utf-8'],
+        '/live.css': ['live.css', 'text/css; charset=utf-8'],
+        '/live.js': ['live.js', 'text/javascript; charset=utf-8']
       };
       if (request.method === 'GET' && publicFiles[url.pathname]) {
         const [file, contentType] = publicFiles[url.pathname];
@@ -54,6 +58,15 @@ function createServer({ apiKey = '', fetchImpl = globalThis.fetch } = {}) {
         return send(response, 200, { status: 'ok', version: '0.1.0', qlooConfigured: Boolean(apiKey), liveRouteReady: false });
       if (request.method === 'GET' && url.pathname === '/api/demo/catalog')
         return send(response, 200, catalogue);
+      if (request.method === 'POST' && url.pathname === '/api/discover') {
+        const body = await readBody(request);
+        const { discoverPlaces, DiscoveryError } = await import('./src/discovery.mjs');
+        try { return send(response, 200, await discoverPlaces({ theme: body.theme, apiKey, fetchImpl })); }
+        catch (error) {
+          if (error instanceof DiscoveryError) return fail(response, error.status, error.code, error.message);
+          throw error;
+        }
+      }
       if (request.method === 'POST' && url.pathname === '/api/plan') {
         const body = await readBody(request);
         if (body.mode !== 'demo' && body.mode !== 'live')
