@@ -34,8 +34,11 @@ export async function discoverPlaces({ theme, apiKey, fetchImpl = fetch }) {
     return payload;
   }
   const search = list(await get('/search', { query: seed.query }));
-  const exact = search.find(e => e.name?.toLowerCase() === seed.query.toLowerCase());
-  const selected = exact || search.find(e => typeof (e.entity_id ?? e.id) === 'string');
+  const selected = search.find(e => {
+    const candidateId = e?.entity_id ?? e?.id;
+    return typeof e?.name === 'string' && e.name.toLowerCase() === seed.query.toLowerCase()
+      && typeof candidateId === 'string' && candidateId.trim().length > 0;
+  });
   const id = selected?.entity_id ?? selected?.id;
   if (!id) throw new DiscoveryError('SEED_NOT_FOUND', 'No usable cultural seed was found. Choose another theme.', 404);
   const raw = list(await get('/v2/insights', { 'filter.type': 'urn:entity:place', 'signal.interests.entities': id, take: 8 }));
