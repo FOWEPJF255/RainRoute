@@ -22,7 +22,7 @@ test('hosted discovery limits inputs, caches upstream calls, and keeps missing c
   const {createHostedHandler}=await import('../src/hosted-worker.mjs');
   let calls=0;
   const env={QLOO_API_KEY:'private-test',DB:makeDb()};
-  const handle=createHostedHandler({fetchImpl:async()=>{calls++;return calls%2?response({results:[{entity_id:'seed-123'}]}):response({results:{entities:[]}});}});
+  const handle=createHostedHandler({fetchImpl:async()=>{calls++;return calls%2?response({results:[{entity_id:'seed-123',name:'The Grand Budapest Hotel'}]}):response({results:{entities:[]}});}});
   const request=theme=>new Request('https://rainroute.test/api/discover',{method:'POST',headers:{'Content-Type':'application/json',Cookie:'rrv=12345678-1234-1234-1234-123456789abc'},body:JSON.stringify({theme})});
   assert.equal((await handle(request('__proto__'),{})).status,400);
   assert.equal((await handle(request('cinema'),{})).status,503);
