@@ -30,9 +30,15 @@ const path = require('node:path');
     await page.locator('.no-solution').waitFor();
     await check(page, 'no solution has no new route', async () => (await page.locator('.route-current').count()) === 0 && await page.locator('.adopt').first().isDisabled());
     await page.screenshot({ path: path.join(out, 'ui-desktop-no-solution.png'), fullPage: true });
+    await page.locator('[data-preset=rain]').click();
+    await page.locator('.branch-option').first().waitFor();
+    await page.locator('#adopt-side').click();
+    await page.waitForFunction(() => document.querySelector('#adopt-note-side')?.textContent.startsWith('已采纳'));
     await page.locator('[data-preset=fault]').click();
     await page.locator('.fault-panel').waitFor();
     await check(page, 'fault has no new route', async () => (await page.locator('.route-current').count()) === 0 && await page.locator('.adopt').first().isDisabled());
+    await check(page, 'fault labels prior adoption as reference only', async () =>
+      (await page.locator('#adopt-note-side').innerText()).includes('本轮没有可采纳分支。此前采纳仅供对照。'));
     await page.screenshot({ path: path.join(out, 'ui-desktop-fault.png'), fullPage: true });
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 844 });
