@@ -250,9 +250,16 @@ function renderChecks() {
 function setAdoptState() {
   const route = currentRoute();
   document.querySelectorAll('.adopt').forEach(button => { button.disabled = !route || dirty; });
-  const note = dirty ? '条件已改变，旧结果和此前采纳均需重新核验。' : accepted && accepted.signature === signature(scenario)
-    ? `已采纳 ${accepted.names}。仅保存本页会话，未订票或支付。`
-    : accepted ? '此前采纳属于旧情境，请重新核验。' : route ? '尚未采纳路线。采纳仅保存本页会话，未订票或支付。' : '本轮没有可采纳分支。';
+  let note = '尚未采纳路线。采纳仅保存本页会话，未订票或支付。';
+  if (dirty) {
+    note = '条件已改变，旧结果和此前采纳均需重新核验。';
+  } else if (!route) {
+    note = accepted ? '本轮没有可采纳分支。此前采纳仅供对照。' : '本轮没有可采纳分支。';
+  } else if (accepted) {
+    note = accepted.signature === signature(scenario)
+      ? `已采纳 ${accepted.names}。仅保存本页会话，未订票或支付。`
+      : '此前采纳属于旧情境，请重新核验。';
+  }
   document.querySelectorAll('.adopt-note').forEach(element => { element.textContent = note; });
 }
 function render() {
