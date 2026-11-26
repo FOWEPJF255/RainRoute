@@ -18,6 +18,10 @@ function fail(response, status, code, message) {
   send(response, status, { error: { code, message } });
 }
 
+function isJsonObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 async function readBody(request) {
   let body = '';
   for await (const chunk of request) {
@@ -28,8 +32,15 @@ async function readBody(request) {
       throw error;
     }
   }
-  try { return JSON.parse(body); }
+  let parsed;
+  try { parsed = JSON.parse(body); }
   catch { const error = new Error('请求体须为 JSON'); error.code = 'INVALID_JSON'; throw error; }
+  if (!isJsonObject(parsed)) {
+    const error = new Error('请求体须为 JSON 对象');
+    error.code = 'INVALID_BODY';
+    throw error;
+  }
+  return parsed;
 }
 
 function createServer({ apiKey = '', fetchImpl = globalThis.fetch } = {}) {
@@ -71,7 +82,10 @@ function createServer({ apiKey = '', fetchImpl = globalThis.fetch } = {}) {
         const body = await readBody(request);
         if (body.mode !== 'demo' && body.mode !== 'live')
           return fail(response, 400, 'INVALID_MODE', 'mode 须为 demo 或 live');
-        const result = await runAgent({ mode: body.mode, scenario: body.scenario || {}, entityId: body.entityId,
+        const scenario = body.scenario === undefined ? {} : body.scenario;
+        if (body.mode === 'demo' && !isJsonObject(scenario))
+          return fail(response, 400, 'INVALID_SCENARIO', '需要情境对象');
+        const result = await runAgent({ mode: body.mode, scenario, entityId: body.entityId,
           qlooClient: body.mode === 'live' ? createQlooClient({ apiKey, fetchImpl }) : undefined });
         if (result.status === 'blocked') return send(response, 503, {
           error: { code: result.reason, message: result.explanation },
@@ -90,7 +104,7 @@ function createServer({ apiKey = '', fetchImpl = globalThis.fetch } = {}) {
       }
       return fail(response, 404, 'NOT_FOUND', '接口不存在');
     } catch (error) {
-      if (error.code === 'INVALID_SCENARIO' || error.code === 'INVALID_JSON')
+      if (['INVALID_SCENARIO', 'INVALID_JSON', 'INVALID_BODY'].includes(error.code))
         return fail(response, 400, error.code, error.message);
       if (error.code === 'BODY_TOO_LARGE') return fail(response, 413, error.code, error.message);
       if (error.name === 'QlooError') return fail(response, error.status, error.code, error.message);
