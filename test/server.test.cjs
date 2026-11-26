@@ -11,6 +11,43 @@ async function withServer(options, run) {
   finally { await new Promise(resolve => server.close(resolve)); }
 }
 
+function post(base, route, body) {
+  return fetch(base + route, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+}
+
+test('POST planning and discovery require JSON object bodies', async () => {
+  await withServer({}, async base => {
+    for (const route of ['/api/plan', '/api/discover']) {
+      for (const body of ['null', '[]', 'false', '0', '"text"']) {
+        const response = await post(base, route, body);
+        assert.equal(response.status, 400, route + ' body: ' + body);
+        assert.equal((await response.json()).error.code, 'INVALID_BODY');
+      }
+      const malformed = await post(base, route, '{');
+      assert.equal(malformed.status, 400);
+      assert.equal((await malformed.json()).error.code, 'INVALID_JSON');
+      const tooLarge = await post(base, route, JSON.stringify({ padding: 'a'.repeat(16384) }));
+      assert.equal(tooLarge.status, 413);
+      assert.equal((await tooLarge.json()).error.code, 'BODY_TOO_LARGE');
+    }
+  });
+});
+
+test('demo planning defaults only an omitted scenario', async () => {
+  await withServer({}, async base => {
+    for (const scenario of [null, false, 0, '', [], 'rain']) {
+      const response = await post(base, '/api/plan', JSON.stringify({ mode: 'demo', scenario }));
+      assert.equal(response.status, 400, 'scenario: ' + JSON.stringify(scenario));
+      assert.equal((await response.json()).error.code, 'INVALID_SCENARIO');
+    }
+    const defaultPlan = await post(base, '/api/plan', '{"mode":"demo"}');
+    assert.equal(defaultPlan.status, 200);
+    const result = await defaultPlan.json();
+    assert.equal(result.source, 'synthetic');
+    assert.equal(result.scenario.rain, false);
+  });
+});
+
 test('本地接口标记合成数据并阻止未核验真实路线', async () => {
   await withServer({}, async base => {
     const health = await (await fetch(`${base}/api/health`)).json();
